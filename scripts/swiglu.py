@@ -20,6 +20,7 @@ class SwiGLU(nn.Module):
         init.kaiming_uniform_(self.w3)
 
     def feed_forward(self, x: torch.Tensor) -> torch.Tensor:
-        swish_output = torch.sigmoid(x @ self.w1.T) * (x @ self.w1.T)
+        W_x = x @ self.w1.T
+        swish_output = torch.sigmoid(W_x) * W_x
         glu_output = swish_output * (x @ self.w3.T)
         return glu_output @ self.w2.T

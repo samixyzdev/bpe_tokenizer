@@ -9,6 +9,7 @@ from scripts.rope import RotaryPositionalEmbedding
 from scripts.softmax import softmax
 from scripts.scaled_dot_product_attention import scaled_dot_product_attention
 from scripts.multihead_self_attention import Multihead_Self_Attention
+from scripts.transformer_block import Transformer_Block
 import os
 from typing import IO, Any, BinaryIO
 from collections.abc import Iterable
@@ -297,8 +298,26 @@ def run_transformer_block(
         Float[Tensor, "batch sequence_length d_model"] Tensor with the output of
         running the Transformer block on the input features while using RoPE.
     """
-    raise NotImplementedError
-
+    test_transformerblock = Transformer_Block(d_model = d_model, 
+                                              num_heads = num_heads, 
+                                              d_ff = d_ff, 
+                                              theta = theta, 
+                                              max_seq_len = 
+                                              max_seq_len,
+                                              )
+    new_state_dict = {
+        'MSA.W_q': weights['attn.q_proj.weight'],
+        'MSA.W_k': weights['attn.k_proj.weight'],
+        'MSA.W_v': weights['attn.v_proj.weight'],
+        'MSA.W_o': weights['attn.output_proj.weight'],
+        'rmsnorm1.weight': weights['ln1.weight'],
+        'rmsnorm2.weight': weights['ln2.weight'],
+        'swiglu.w1': weights['ffn.w1.weight'],
+        'swiglu.w2': weights['ffn.w2.weight'],
+        'swiglu.w3': weights['ffn.w3.weight'],
+    }
+    test_transformerblock.load_state_dict(new_state_dict)
+    return test_transformerblock.forward(in_features)
 
 def run_transformer_lm(
     vocab_size: int,
